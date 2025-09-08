@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 // Criar um usuário
 Cypress.Commands.add('createUser', () => {
   const userName = faker.person.firstName() + faker.string.numeric(4);
-  const password = 'Senha@123';
+  const password = 'Teste@123';
 
   return cy.request({
     method: 'POST',
@@ -20,6 +20,24 @@ Cypress.Commands.add('createUser', () => {
   });
 });
 
+// Criar um usuário inválido 
+Cypress.Commands.add("createInvalidUser", () => {
+  const userName = faker.person.firstName(); // sem senha
+
+  return cy.request({
+    method: "POST",
+    url: "/Account/v1/User",
+    body: { userName },
+    failOnStatusCode: false,
+  }).then((response) => {
+    return {
+      response,
+      userName,
+    };
+  });
+});
+
+
 // Gerar um token de acesso
 Cypress.Commands.add('generateToken', (userName, password) => {
   return cy.request({
@@ -30,6 +48,17 @@ Cypress.Commands.add('generateToken', (userName, password) => {
     return response.body.token;
   });
 });
+
+// Tentativa de gerar um token de acesso para um usuario sem senha
+Cypress.Commands.add("generateInvalidToken", (userName) => {
+  return cy.request({
+    method: "POST",
+    url: "/Account/v1/GenerateToken",
+    body: { userName },
+    failOnStatusCode: false, 
+  });
+});
+
 
 // Confirmar se o usuário criado está autorizado
 Cypress.Commands.add('authorizeUser', (userName, password) => {
